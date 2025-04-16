@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Profile Settings</h3>
+                    <button class="btn btn-primary" id="saveChanges">Save Changes</button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Account Information</h4>
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" value="{{ user.username }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" value="{{ user.email }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Preferences</h4>
+                            <div class="mb-3">
+                                <label for="language" class="form-label">Language</label>
+                                <select class="form-select" id="language">
+                                    <option value="en" {% if user.preferences.language == 'en' %}selected{% endif %}>English</option>
+                                    <option value="es" {% if user.preferences.language == 'es' %}selected{% endif %}>Español</option>
+                                    <option value="fr" {% if user.preferences.language == 'fr' %}selected{% endif %}>Français</option>
+                                    <option value="de" {% if user.preferences.language == 'de' %}selected{% endif %}>Deutsch</option>
+                                    <option value="it" {% if user.preferences.language == 'it' %}selected{% endif %}>Italiano</option>
+                                    <option value="pt" {% if user.preferences.language == 'pt' %}selected{% endif %}>Português</option>
+                                    <option value="zh" {% if user.preferences.language == 'zh' %}selected{% endif %}>中文</option>
+                                    <option value="ja" {% if user.preferences.language == 'ja' %}selected{% endif %}>日本語</option>
+                                    <option value="hi" {% if user.preferences.language == 'hi' %}selected{% endif %}>हिंदी</option>
+                                    <option value="ar" {% if user.preferences.language == 'ar' %}selected{% endif %}>العربية</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="timezone" class="form-label">Timezone</label>
+                                <select class="form-select" id="timezone">
+                                    <option value="UTC" {% if user.preferences.timezone == 'UTC' %}selected{% endif %}>UTC</option>
+                                    <option value="Asia/Kolkata" {% if user.preferences.timezone == 'Asia/Kolkata' %}selected{% endif %}>India (Asia/Kolkata)</option>
+                                    <option value="America/New_York" {% if user.preferences.timezone == 'America/New_York' %}selected{% endif %}>New York (America/New_York)</option>
+                                    <option value="Europe/London" {% if user.preferences.timezone == 'Europe/London' %}selected{% endif %}>London (Europe/London)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="voice_id" class="form-label">Voice</label>
+                                <select class="form-select" id="voice_id">
+                                    <option value="">Select Voice</option>
+                                    {% for voice in voices %}
+                                    <option value="{{ voice.id }}" {% if user.preferences.voice_id == voice.id %}selected{% endif %}>
+                                        {{ voice.name }} ({{ voice.language }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="speaking_rate" class="form-label">Speaking Rate</label>
+                                <div class="d-flex align-items-center">
+                                    <input type="range" class="form-range" id="speaking_rate" 
+                                        min="100" max="300" step="10" 
+                                        value="{{ user.preferences.speaking_rate }}">
+                                    <span class="rate-value ms-2">{{ user.preferences.speaking_rate }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="volume" class="form-label">Volume</label>
+                                <div class="d-flex align-items-center">
+                                    <input type="range" class="form-range" id="volume" 
+                                        min="0" max="100" step="1" 
+                                        value="{{ user.preferences.volume }}">
+                                    <span class="volume-value ms-2">{{ user.preferences.volume }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="theme" class="form-label">Theme</label>
+                                <select class="form-select" id="theme">
+                                    <option value="dark" {% if user.preferences.theme == 'dark' %}selected{% endif %}>Dark</option>
+                                    <option value="light" {% if user.preferences.theme == 'light' %}selected{% endif %}>Light</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update rate and volume values when sliders change
+const rateSlider = document.getElementById('speaking_rate');
+const rateValue = document.querySelector('.rate-value');
+rateSlider.addEventListener('input', () => {
+    rateValue.textContent = rateSlider.value;
+});
+
+const volumeSlider = document.getElementById('volume');
+const volumeValue = document.querySelector('.volume-value');
+volumeSlider.addEventListener('input', () => {
+    volumeValue.textContent = volumeSlider.value;
+});
+
+// Save changes
+document.getElementById('saveChanges').addEventListener('click', async () => {
+    const data = {
+        username: document.getElementById('username').value,
+        email: document.getElementById('email').value,
+        language: document.getElementById('language').value,
+        timezone: document.getElementById('timezone').value,
+        voice_id: document.getElementById('voice_id').value,
+        speaking_rate: document.getElementById('speaking_rate').value,
+        volume: document.getElementById('volume').value,
+        theme: document.getElementById('theme').value
+    };
+
+    try {
+        const response = await fetch('/auth/api/profile', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            alert('Profile updated successfully!');
+        } else {
+            alert(result.message || 'Failed to update profile');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    }
+});
+</script>
+{% endblock %}

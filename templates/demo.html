@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura AI Assistant - Modern Dark Theme</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .chat-message {
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 70%;
+            margin-bottom: 10px;
+        }
+        .user-message {
+            background-color: #e9ecef;
+            align-self: flex-end;
+        }
+        .assistant-message {
+            background-color: #f8f9fa;
+            align-self: flex-start;
+        }
+        .listening-indicator {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-robot me-2"></i>Aura AI Assistant
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                            <i class="fas fa-cog me-1"></i>Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">Welcome to Aura AI Assistant</h3>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary voice-button" id="voiceButton">
+                                <div class="listening-indicator"></div>
+                                <i class="fas fa-microphone"></i> Voice Input
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <input type="text" id="commandInput" class="form-control" placeholder="Type your command (e.g., 'Aura time')" autocomplete="off">
+                            <button class="btn btn-primary" id="sendCommand" type="button">
+                                <i class="fas fa-paper-plane me-1"></i>Send
+                            </button>
+                        </div>
+                        
+                        <div class="chat-container" id="chatHistory">
+                            <!-- Chat messages will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Language</label>
+                        <select class="form-select" id="languageSelect">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="it">Italiano</option>
+                            <option value="pt">Português</option>
+                            <option value="zh">中文</option>
+                            <option value="ja">日本語</option>
+                            <option value="hi">हिंदी</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Voice</label>
+                        <select class="form-select" id="voiceSelect"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Speaking Rate</label>
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range" id="speakingRate" min="100" max="300" step="10">
+                            <span class="rate-value ms-2">200</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Volume</label>
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range" id="volume" min="0" max="100" step="1">
+                            <span class="volume-value ms-2">100</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveSettings">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+    <script>
+        // Initialize SpeechRecognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        // Initialize UI elements
+        const commandInput = document.getElementById('commandInput');
+        const sendCommand = document.getElementById('sendCommand');
+        const voiceButton = document.getElementById('voiceButton');
+        const chatHistory = document.getElementById('chatHistory');
+        const listeningIndicator = document.querySelector('.listening-indicator');
+        let isListening = false;
+
+        // Event listeners
+        sendCommand.addEventListener('click', sendCommandHandler);
+        voiceButton.addEventListener('click', toggleVoiceRecognition);
+
+        // Speech recognition handlers
+        recognition.onstart = () => {
+            isListening = true;
+            voiceButton.classList.add('btn-danger');
+            voiceButton.innerHTML = '<i class="fas fa-microphone-slash"></i> Stop Listening';
+            listeningIndicator.style.display = 'inline-block';
+        };
+
+        recognition.onend = () => {
+            isListening = false;
+            voiceButton.classList.remove('btn-danger');
+            voiceButton.innerHTML = '<i class="fas fa-microphone"></i> Voice Input';
+            listeningIndicator.style.display = 'none';
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            commandInput.value = transcript;
+            sendCommandHandler();
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            if (event.error === 'no-speech') {
+                showNotification('No speech detected');
+            } else if (event.error === 'audio-capture') {
+                showNotification('Microphone access denied');
+            }
+        };
+
+        function sendCommandHandler() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+
+            // Add user message to chat
+            addMessage(command, 'user');
+            
+            // Send command to server
+            fetch('/api/command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    addMessage(data.result, 'assistant');
+                } else {
+                    addMessage('Error: ' + data.message, 'assistant');
+                }
+            })
+            .catch(error => {
+                addMessage('Error: Failed to process command', 'assistant');
+            });
+
+            commandInput.value = '';
+        }
+
+        function toggleVoiceRecognition() {
+            if (!isListening) {
+                recognition.start();
+            } else {
+                recognition.stop();
+            }
+        }
+
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${type}-message`;
+            messageDiv.textContent = text;
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'alert alert-info alert-dismissible fade show';
+            notification.innerHTML = `
+                <strong>${message}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container').insertBefore(notification, document.querySelector('.card'));
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Request microphone permission on page load
+        window.addEventListener('load', () => {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(() => {
+                    console.log('Microphone access granted');
+                })
+                .catch((err) => {
+                    console.error('Microphone access denied:', err);
+                    showNotification('Please grant microphone access to use voice commands');
+                });
+        });
+    </script>
+</body>
+</html>

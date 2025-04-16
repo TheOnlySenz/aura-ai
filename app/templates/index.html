@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Aura AI Assistant</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" id="commandInput" class="form-control" placeholder="Enter your command...">
+                            <button class="btn btn-primary" id="sendCommand">Send</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" id="voiceButton">
+                                <i class="fas fa-microphone"></i> Voice Input
+                            </button>
+                            <button class="btn btn-secondary" id="settingsButton">
+                                <i class="fas fa-cog"></i> Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-container">
+                    <div id="chatHistory" class="chat-history">
+                        <!-- Chat messages will be appended here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="settingsForm">
+                    <div class="mb-3">
+                        <label class="form-label">Language</label>
+                        <select class="form-select" id="languageSelect"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Voice</label>
+                        <select class="form-select" id="voiceSelect"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Speaking Rate</label>
+                        <input type="range" class="form-range" id="speakingRate" min="100" max="300" step="10">
+                        <div class="rate-value">200</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Volume</label>
+                        <input type="range" class="form-range" id="volume" min="0" max="100" step="1">
+                        <div class="volume-value">100</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveSettings">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
